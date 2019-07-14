@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class UserMgmtService {
 
-  private url = 'http://localhost:3000';
+  private url = 'http://todoback.myinfo.world';
   constructor(public http: HttpClient, private cookieService: CookieService) {
   }
 
