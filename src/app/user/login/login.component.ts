@@ -86,7 +86,6 @@ export class LoginComponent implements OnInit {
             this.cookieService.set('userId', apiResponse.data.userDetails.userId);
             this.cookieService.set('userName', apiResponse.data.userDetails.firstName + ' ' + apiResponse.data.userDetails.lastName);
             this.appService.setUserInfoInLocalStorage(apiResponse.data.userDetails)
-            this.toastr.show('Login Successful');
             this.router.navigate(['/dashboard']);
           } else {
             this.toastr.error(apiResponse.message)
@@ -119,7 +118,6 @@ export class LoginComponent implements OnInit {
             this.cookieService.set('userId', apiResponse.data.userDetails.userId);
             this.cookieService.set('userName', apiResponse.data.userDetails.firstName + ' ' + apiResponse.data.userDetails.lastName);
             this.appService.setUserInfoInLocalStorage(apiResponse.data.userDetails)
-            this.toastr.show('Login Successful');
             this.router.navigate(['/dashboard']);
           } else {
             this.toastr.error("Error")

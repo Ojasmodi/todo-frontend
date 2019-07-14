@@ -31,7 +31,8 @@
             <div *ngFor="let user of allUsers">
               <div *ngIf="user.userId!=userId" class="m-2">
                 <span class="text-capitalize">{{user.firstName}} {{user.lastName}}</span>
-                <span style="float: right"><button class="btn btn-dark btn-sm" (click)="sendRequest(user)">Send Request</button></span>
+                <span style="float: right"><button class="btn btn-dark btn-sm" (click)="sendRequest(user)">Send
+                    Request</button></span>
               </div>
             </div>
           </div>
@@ -50,7 +51,8 @@
           <div *ngIf="friendRequest.length">
             <div *ngFor="let user of friendRequest" class="m-2">
               <span class="text-capitalize">{{user.user1Name}} </span>
-              <span style="float: right"><button class="btn btn-success btn-sm" (click)="acceptRequest(user)">Confirm</button></span>
+              <span style="float: right"><button class="btn btn-success btn-sm"
+                  (click)="acceptRequest(user)">Confirm</button></span>
             </div>
           </div>
           <div *ngIf="!friendRequest || friendRequest.length==0">
@@ -68,7 +70,8 @@
           <div *ngIf="friends.length">
             <div *ngFor="let user of friends" class="m-2">
               <span class="text-capitalize">{{user.friendName}} </span>
-              <span style="float: right"><button class="btn btn-dark btn-sm" (click)="getFriendTodos(user)">View TODO</button></span>
+              <span style="float: right"><button class="btn btn-dark btn-sm" (click)="getFriendTodos(user)">View
+                  TODO</button></span>
             </div>
           </div>
           <div *ngIf="!friends || friends.length==0">

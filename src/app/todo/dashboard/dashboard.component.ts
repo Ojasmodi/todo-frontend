@@ -80,12 +80,9 @@ export class DashboardComponent implements OnInit {
     this.getUpdatedSubItem();
     this.getUndoError();
     this.callDisconnectedSocket();
-    //this.spinner.show();
-    //this.getAllUsers();
-    //this.getAllLists(this.userId)
-    //this.getAllItems()
   }
 
+  // function to get all users
   getAllUsers = () => {
     this.allUsers = []
     this.friendRequest = []
@@ -96,11 +93,8 @@ export class DashboardComponent implements OnInit {
         this.todoService.getAllFriendList().subscribe((apiResponse) => {
           if (apiResponse['status'] === 200) {
             this.friendsPending = apiResponse['data'];
-            console.log(this.friendsPending)
+            // console.log(this.friendsPending)
             this.seperateRequestAndFriendsForCurrentUser(this.friendsPending);
-          }
-          else {
-            this.toastrService.error("Failed to retrieve all Friends")
           }
         },
           (err) => {
@@ -108,16 +102,10 @@ export class DashboardComponent implements OnInit {
           }
         );
       }
-      else {
-        this.toastrService.error("Failed to retrieve all users.")
-      }
-    },
-      (err) => {
-        this.toastrService.error("Network problem.")
-      }
-    );
+    });
   }
 
+  // function to get all todo lists of particular user
   getAllLists = (userId) => {
     this.allLists = []
     this.todoService.getAllList(userId).subscribe((apiResponse) => {
@@ -135,19 +123,18 @@ export class DashboardComponent implements OnInit {
     );
   }
 
+  // function to get all items and subitems
   getAllItems = () => {
     this.todoService.getAllItems().subscribe((apiResponse) => {
       if (apiResponse['status'] === 200) {
-        console.log(apiResponse)
         this.allItems = apiResponse['data'];
       }
-    }
-    );
+    });
   }
 
+  // event for getting deleted list
   getDeletedList = () => {
     this.deletedListSubs = this.todoService.getDeletedList().subscribe((apiResponse) => {
-      console.log(apiResponse)
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.listCreatorId;
         let deletedByUserName = apiResponse.deletedBy;
@@ -169,9 +156,9 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // event for getting deleted item
   getDeletedItem = () => {
     this.deletedItemSubs = this.todoService.getDeletedItem().subscribe((apiResponse) => {
-      console.log(apiResponse)
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.itemCreatorId;
         let deletedByUserName = apiResponse.deletedBy;
@@ -193,9 +180,10 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // event for getting deleted subitem
   getDeletedSubItem = () => {
     this.deletedSubItemSubs = this.todoService.getDeletedSubItem().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.subItemCreatorId;
         let deletedByUserName = apiResponse.deletedBy;
@@ -217,6 +205,7 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // function to change UI based on list
   modifyList = (data, op) => {
 
     if (op == 'delete') {
@@ -238,6 +227,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to change UI based on subitem
   modifySubItem = (data, op) => {
     if (op == 'delete') {
       for (let item of this.allItems) {
@@ -264,6 +254,7 @@ export class DashboardComponent implements OnInit {
 
   }
 
+  // function to change UI based on item
   modifyItem = (data, op) => {
     if (op == 'delete') {
       for (let u of this.allItems) {
@@ -285,9 +276,10 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // event to get new subitem
   getNewSubItem = () => {
     this.getNewSubItemSubs = this.todoService.getNewSubItem().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       this.item_subitem = '';
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.subItemCreatorId;
@@ -296,7 +288,7 @@ export class DashboardComponent implements OnInit {
           $('#addModal').modal('hide');
         }
         if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
-          console.log("undo")
+          // console.log("undo")
           this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
         }
         else if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
@@ -317,9 +309,10 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // event to get new item
   getNewItem = () => {
     this.getNewItemSubs = this.todoService.getNewItem().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       this.item_subitem = '';
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.itemCreatorId;
@@ -345,6 +338,7 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // function to check whether user is a friend or current user or not
   isFriend = (createdByUserId) => {
     for (let friend of this.friends) {
       if (friend.friendId == createdByUserId)
@@ -353,9 +347,10 @@ export class DashboardComponent implements OnInit {
     return false;
   }
 
+  // event for getting updated list
   getUpdatedList = () => {
     this.updatedListSubs = this.todoService.getUpdatedList().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.listModifierId;
         let modifiedByUserName = apiResponse.data.listModifierName;
@@ -380,9 +375,10 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // event for getting updated item
   getUpdatedItem = () => {
     this.updatedItemSubs = this.todoService.getUpdatedItem().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.itemModifierId;
         let modifiedByUserName = apiResponse.data.itemModifierName;
@@ -407,9 +403,10 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // event for getting updated subitem
   getUpdatedSubItem = () => {
     this.updatedSubItemSubs = this.todoService.getUpdatedSubItem().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.subItemModifierId;
         let modifiedByUserName = apiResponse.data.subItemModifierName;
@@ -434,6 +431,7 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // function to update UI based on subitem
   addNewSubItem = (data) => {
     for (let item of this.allItems) {
       if (item['itemId'] == data.parentItemId) {
@@ -443,6 +441,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to update UI based on item
   addNewItem = (data) => {
     for (let list of this.allLists) {
       if (list['listId'] == data.listId) {
@@ -451,6 +450,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to get currently selected list/item/subitem
   currentlySelected = (list, item = 0, subitem = 0) => {
     if (item == 0 && subitem == 0) {
       this.isList = true;
@@ -475,6 +475,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to emit update list/item/subitem
   update = () => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -517,6 +518,7 @@ export class DashboardComponent implements OnInit {
 
   }
 
+  // function to emit create item/subitem
   additem_subitem = () => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -525,7 +527,7 @@ export class DashboardComponent implements OnInit {
       this.toastrService.warning("Enter some text.")
     }
     else if (this.selectedSubItem == 0 && this.selectedItem == 0) {
-      console.log("item")
+      // console.log("item")
       let data = {
         listId: this.selectedList.listId,
         itemName: this.item_subitem,
@@ -536,7 +538,7 @@ export class DashboardComponent implements OnInit {
       this.todoService.emitEvent('create-item', data);
     }
     else {
-      console.log("subitem")
+      // console.log("subitem")
       let data = {
         itemId: this.selectedItem.itemId,
         subItemName: this.item_subitem,
@@ -548,6 +550,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to emit delete subitem
   deleteSubItem = (list, item, subItem) => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -565,6 +568,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to emit create list
   createList = () => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -583,6 +587,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to get newly created list
   getNewList = () => {
     this.getNewListSubs = this.todoService.getNewList().subscribe((apiResponse) => {
       if (apiResponse.status == 200) {
@@ -609,6 +614,7 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // function to delete list
   deleteList = (list) => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -624,6 +630,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to delete item
   deleteItem = (list, Item) => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -640,6 +647,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to perform undo action
   undo = () => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -660,9 +668,10 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to get undo_error after undo action
   getUndoError = () => {
     this.undoSubs = this.getNewItemSubs = this.todoService.getUndoError().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       if (apiResponse.status == 404) {
         let createdByUserId = apiResponse.data.changeDoneById;
         if (createdByUserId == this.userId) {
@@ -672,9 +681,9 @@ export class DashboardComponent implements OnInit {
     })
   }
 
-
+  // function to seperate objects based on friend and request status
   public seperateRequestAndFriendsForCurrentUser = (friendList) => {
-    //console.log(friendList)
+    //// console.log(friendList)
     for (let f of friendList) {
       if (this.userId == f.user1Id) {
         // removing users who are in friend status
@@ -720,7 +729,7 @@ export class DashboardComponent implements OnInit {
         }
 
       }
-      console.log(this.friends)
+      // console.log(this.friends)
     }
   }
 
@@ -750,6 +759,7 @@ export class DashboardComponent implements OnInit {
       });
   }
 
+  // function to  send request
   public sendRequest = (user) => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -765,9 +775,10 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to  get new friend request
   public getNewFriendRequest = () => {
     this.getNewFriendRequestSubs = this.todoService.getNewFriendRequest().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         if (apiResponse.data.user1Id == this.userId) {
           this.toastrService.success('Request send successfully.')
@@ -787,7 +798,7 @@ export class DashboardComponent implements OnInit {
               this.allUsers.splice(removeIndex, 1)
             }
           }
-          console.log(this.friendRequest)
+          // console.log(this.friendRequest)
         }
       }
       else {
@@ -801,9 +812,10 @@ export class DashboardComponent implements OnInit {
       });
   }
 
+  // function to  get new friend 
   public getNewFriend = () => {
     this.getNewFriendSubs = this.todoService.getNewFriend().subscribe((apiResponse) => {
-      console.log(apiResponse)
+      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         if (apiResponse.data.user1Id == this.userId) {
           this.toastrService.success(`You are now friend with ${apiResponse.data.user2Name}`)
@@ -826,7 +838,7 @@ export class DashboardComponent implements OnInit {
             friendName: apiResponse.data.user1Name,
           }
           this.friends.push(newFriend)
-          console.log(this.friendRequest)
+          // console.log(this.friendRequest)
         }
       }
       else {
@@ -840,6 +852,7 @@ export class DashboardComponent implements OnInit {
       });
   }
 
+  // function to  accept friend request
   public acceptRequest = (data) => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -849,6 +862,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to  get friend todos
   public getFriendTodos = (user) => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -860,6 +874,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // function to  currentUser todos
   public getMyTodos = () => {
     if (this.disconnectedSocket == true) {
       this.toastrService.error("Network problem.")
@@ -902,6 +917,7 @@ export class DashboardComponent implements OnInit {
     })
   }
 
+  // unsubscribing all the subscriptions
   ngOnDestroy() {
     this.liveConSubs.unsubscribe();
     this.undoSubs.unsubscribe();
