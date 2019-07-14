@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import * as io from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class TodoMgmtService {
   private url = 'http://localhost:3000';
   private socket;
 
-  constructor(public http: HttpClient) {
+  constructor(public http: HttpClient, private cookieService: CookieService) {
     this.socket = io(this.url);
   }
 
@@ -124,15 +125,15 @@ export class TodoMgmtService {
   }
 
   public getAllFriendList = () => {
-    return this.http.get(`${this.url}/api/v1/friend/getAllFriendList`);
+    return this.http.get(`${this.url}/api/v1/friend/getAllFriendList?authToken=${this.cookieService.get('authToken')}`);
   }
 
   public getAllList = (id) => {
-    return this.http.get(`${this.url}/api/v1/list/getAllList/${id}`);
+    return this.http.get(`${this.url}/api/v1/list/getAllList/${id}?authToken=${this.cookieService.get('authToken')}`);
   }
 
   public getAllItems = () => {
-    return this.http.get(`${this.url}/api/v1/item/getAllItems`);
+    return this.http.get(`${this.url}/api/v1/item/getAllItems?authToken=${this.cookieService.get('authToken')}`);
   }
 
   public disconnectedSocket = () => {
