@@ -9,7 +9,7 @@ import { CookieService } from 'ngx-cookie-service';
 })
 export class TodoMgmtService {
 
-  private url = 'http://localhost:3006';
+  private url = 'http://todoback.myinfo.world';
   private socket;
 
   constructor(public http: HttpClient, private cookieService: CookieService) {
