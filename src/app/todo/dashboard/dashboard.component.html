@@ -20,8 +20,8 @@
   </div>
 </nav>
 <div class="container">
-  <div class="row m-2">
-    <div class="col-sm">
+  <div class="row">
+    <div class="col-sm m-2">
       <div class="card text-white bg-primary">
         <div class="card-header bg-dark">
           All users
@@ -42,7 +42,7 @@
         </div>
       </div>
     </div>
-    <div class="col-sm">
+    <div class="col-sm m-2">
       <div class="card text-white bg-secondary">
         <div class="card-header bg-dark">
           Friend-Request
@@ -61,16 +61,16 @@
         </div>
       </div>
     </div>
-    <div class="col-sm">
+    <div class="col-sm m-2">
       <div class="card text-white bg-success">
         <div class="card-header bg-dark">
           Friends
         </div>
         <div class="watcher">
           <div *ngIf="friends.length">
-            <div *ngFor="let user of friends" class="m-2">
+            <div *ngFor="let user of friends" class="m-2 clearfix">
               <span class="text-capitalize">{{user.friendName}} </span>
-              <span style="float: right"><button class="btn btn-dark btn-sm" (click)="getFriendTodos(user)">View
+              <span class="float-right"><button class="btn btn-dark btn-sm" (click)="getFriendTodos(user)">View
                   TODO</button></span>
             </div>
           </div>
@@ -93,14 +93,14 @@
 
   <br>
 
-  <div class="row border border-dark p-2 m-2">
+  <div class="row border border-dark p-2 m-2 text">
     <h3 class="text-capitalize">{{selectedFriend?selectedFriend.friendName+"'s Todos:":"My Todos:"}}</h3><br>
-    <table class="table table-striped table-sm ">
+    <table class="table table-sm  ">
       <tbody>
-        <ul class="list-group " *ngFor="let list of allLists">
+        <ul class="list-group clearfix" *ngFor="let list of allLists">
           <li class="list-group-item border border-danger"
             style="background-color: rgb(86, 75, 184);color: white;margin-bottom: 1px;">{{list.listName}}
-            <span style="float:right ">
+            <span class="float-right">
               <span data-toggle="tooltip" data-placement="top" title="Add item">
                 <i class="fas fa-plus margin-button" style='color:yellowgreen;' (click)="currentlySelected(list)"
                   data-toggle="modal" data-target="#addModal"></i>
@@ -113,16 +113,17 @@
                 <i class='fas fa-trash-alt margin-button' style='color:red;' (click)="deleteList(list)"></i>
               </span>
             </span></li>
-          <ul class="list-group" style="margin-left: 1rem;" *ngFor="let item of allItems">
+          <ul class="list-group clearfix" style="margin-left: 1rem;" *ngFor="let item of allItems">
             <span *ngIf="item.listId==list.listId">
-              <li class="list-group-item border border-info"
+              <li class="list-group-item  border border-info"
                 style="background-color: rgb(54, 15, 128);color: white;margin-bottom: 1px;">{{item.itemName}}
-                <span style="float:right ">
+                <span class="float-right">
                   <span data-toggle="tooltip" data-placement="top" title="Add subItem">
                     <i class="fas fa-plus margin-button" style='color:yellowgreen;'
                       (click)="currentlySelected(list,item)" data-toggle="modal" data-target="#addModal"></i>
                   </span>
-                  {{item.itemDone=='open'?'Open':'Done'}}
+                  
+                  <b>{{item.itemDone=='open'?'Open':'Done'}}</b>
                   <span data-toggle="tooltip" data-placement="top" title="Edit Item">
                     <i class='fas fa-pen margin-button' (click)="currentlySelected(list,item)" data-toggle="modal"
                       data-target="#exampleModalCenter"></i>
@@ -131,15 +132,16 @@
                     <i class='fas fa-trash-alt margin-button' style='color:red;' (click)="deleteItem(list,item)"></i>
                   </span>
                 </span></li>
-              <ul class="list-group" style="margin-left: 1rem;" *ngFor="let subItem of item.subItems">
+              <ul class="list-group clearfix" style="margin-left: 1rem;" *ngFor="let subItem of item.subItems">
                 <li class="list-group-item border border-dark"
                   style="background-color: rgb(131, 21, 98);color: white;margin-bottom: 1px;">{{subItem.subItemName}}
-                  <span style="float:right ">
-                    {{subItem.subItemDone=='open'?'Open':'Done'}}
+                  <span class="float-right">
+                    
                     <span data-toggle="tooltip" data-placement="top" title="Edit SubItem">
                       <i class='fas fa-pen margin-button' (click)="currentlySelected(list,item,subItem)"
                         data-toggle="modal" data-target="#exampleModalCenter"></i>
                     </span>
+                    <b>{{subItem.subItemDone=='open'?'Open':'Done'}}</b>
                     <span data-toggle="tooltip" data-placement="top" title="Delete SubItem">
                       <i class='fas fa-trash-alt margin-button' style='color:red;'
                         (click)="deleteSubItem(list,item,subItem)"></i>

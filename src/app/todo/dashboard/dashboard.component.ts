@@ -52,6 +52,7 @@ export class DashboardComponent implements OnInit {
   getNewFriendRequestSubs
   getNewFriendSubs
   undoSubs
+  conSubs
   disconnectedSocket = true;
 
   constructor(public toastrService: ToastrService, public router: Router, private spinner: NgxSpinnerService,
@@ -320,7 +321,11 @@ export class DashboardComponent implements OnInit {
         if (this.userId == createdByUserId) {
           $('#addModal').modal('hide');
         }
-        if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
+        if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
+          // console.log("undo")
+          this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
+        }
+        else if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
           this.toastrService.show(`${createdByUserName} created a new item ${apiResponse.data.itemName}`)
         }
         this.addNewItem(apiResponse.data);
@@ -595,11 +600,15 @@ export class DashboardComponent implements OnInit {
           $('#listModal').modal('hide');
           this.allLists.push(apiResponse.data)
         }
-        if (this.selectedFriend != null && this.selectedFriend.friendId == apiResponse.data.listCreatorId) {
-          this.allLists.push(apiResponse.data)
+        if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
+          // console.log("undo")
+          this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
         }
-        this.listName = ""
-        this.toastrService.show(`${apiResponse.data.listCreatorName} created a  new Todo-list ${apiResponse.data.listName}`);
+        else if (this.selectedFriend != null && this.selectedFriend.friendId == apiResponse.data.listCreatorId) {
+          this.allLists.push(apiResponse.data)
+          this.listName = ""
+          this.toastrService.show(`${apiResponse.data.listCreatorName} created a  new Todo-list ${apiResponse.data.listName}`);
+        }
       }
       else if (this.userId == apiResponse.data.listCreatorId) {
         if (apiResponse.status == 404) {
@@ -747,7 +756,7 @@ export class DashboardComponent implements OnInit {
 
   // function to  verify user confirmation
   public verifyUserConfirmation: any = () => {
-    this.todoService.verifyUser()
+    this.conSubs = this.todoService.verifyUser()
       .subscribe((data) => {
         this.disconnectedSocket = false;
         this.spinner.hide();
@@ -913,12 +922,13 @@ export class DashboardComponent implements OnInit {
     this.liveConSubs = this.todoService.disconnectedSocket().subscribe(() => {
       this.disconnectedSocket = true;
       this.spinner.show();
-      this.toastrService.error("Connection-lost", 'Check network-connection');
+      //this.toastrService.error("Connection-lost", 'Check network-connection');
     })
   }
 
   // unsubscribing all the subscriptions
   ngOnDestroy() {
+    this.conSubs.unsubscribe();
     this.liveConSubs.unsubscribe();
     this.undoSubs.unsubscribe();
     this.deletedListSubs.unsubscribe();

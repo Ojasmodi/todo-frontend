@@ -1,6 +1,9 @@
 .margin-button{
     margin-right: 1rem;
 }
+.w{
+    padding-right: 1px;
+}
 .watcher {
     height: 120px;       /* Just for the demo          */
     overflow-y: auto;    /* Trigger vertical scroll    */
