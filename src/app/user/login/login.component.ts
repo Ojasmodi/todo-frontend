@@ -20,8 +20,8 @@ export class LoginComponent implements OnInit {
   public forget_email: string;
 
   constructor(public _route: ActivatedRoute, public router: Router, private toastr: ToastrService,
-              private appService: UserMgmtService, private cookieService: CookieService,
-              private authService: AuthService, public spinner: NgxSpinnerService) {
+    private appService: UserMgmtService, private cookieService: CookieService,
+    private authService: AuthService, public spinner: NgxSpinnerService) {
   }
 
   ngOnInit() {

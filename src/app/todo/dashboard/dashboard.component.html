@@ -20,52 +20,69 @@
   </div>
 </nav>
 <div class="container">
-  <div class="row">
+  <div class="row m-2">
     <div class="col-sm">
-      <h3>All users</h3>
-      <div *ngIf="allUsers.length">
-        <div *ngFor="let user of allUsers">
-          <div *ngIf="user.userId!=userId" class="m-2">
-            <span class="text-capitalize">{{user.firstName}} {{user.lastName}}</span>
-            <span><button class="btn btn-info btn-sm" (click)="sendRequest(user)">Send Request</button></span>
+      <div class="card text-white bg-primary">
+        <div class="card-header bg-dark">
+          All users
+        </div>
+        <div class="watcher">
+          <div *ngIf="allUsers">
+            <div *ngFor="let user of allUsers">
+              <div *ngIf="user.userId!=userId" class="m-2">
+                <span class="text-capitalize">{{user.firstName}} {{user.lastName}}</span>
+                <span><button class="btn btn-dark btn-sm" (click)="sendRequest(user)">Send Request</button></span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!allUsers || allUsers.length==0">
+            No users found.
           </div>
         </div>
       </div>
-      <div *ngIf="!allUsers">
-        No users found.
+    </div>
+    <div class="col-sm">
+      <div class="card text-white bg-secondary">
+        <div class="card-header bg-dark">
+          Friend-Request
+        </div>
+        <div class="watcher">
+          <div *ngIf="friendRequest.length">
+            <div *ngFor="let user of friendRequest" class="m-2">
+              <span class="text-capitalize">{{user.user1Name}} </span>
+              <span><button class="btn btn-success btn-sm" (click)="acceptRequest(user)">Confirm</button></span>
+            </div>
+          </div>
+          <div *ngIf="!friendRequest || friendRequest.length==0">
+            No friend-request.
+          </div>
+        </div>
       </div>
     </div>
     <div class="col-sm">
-      <h3>Friend-Request</h3>
-      <div *ngIf="friendRequest.length">
-        <div *ngFor="let user of friendRequest" class="m-2">
-          <span class="text-capitalize">{{user.user1Name}} </span>
-          <span><button class="btn btn-success btn-sm" (click)="acceptRequest(user)">Confirm</button></span>
+      <div class="card text-white bg-success">
+        <div class="card-header bg-dark">
+          Friends
         </div>
-      </div>
-      <div *ngIf="!friendRequest.length">
-        No friend-request.
-      </div>
-    </div>
-    <div class="col-sm">
-      <h3>Friends</h3>
-      <div *ngIf="friends.length">
-        <div *ngFor="let user of friends" class="m-2">
-          <span class="text-capitalize">{{user.friendName}} </span>
-          <span><button class="btn btn-success btn-sm" (click)="getFriendTodos(user)">View TODO</button></span>
+        <div class="watcher">
+          <div *ngIf="friends.length">
+            <div *ngFor="let user of friends" class="m-2">
+              <span class="text-capitalize">{{user.friendName}} </span>
+              <span><button class="btn btn-dark btn-sm" (click)="getFriendTodos(user)">View TODO</button></span>
+            </div>
+          </div>
+          <div *ngIf="!friends || friends.length==0">
+            No friends.
+          </div>
         </div>
-      </div>
-      <div *ngIf="!friends.length">
-        No friends.
       </div>
     </div>
   </div>
-  <br><br>
   <hr>
   <div class="row justify-content-center" *ngIf="selectedFriend==null">
-    <button class="btn btn-info btn-sm text-center " data-toggle="modal"
-      data-target="#listModal">Create a new Todo list. Click here.</button>
-      <button class="btn btn-warning btn-sm text-center ml-2 border border-dark" (click)="undo()">Undo change</button>
+    <button class="btn btn-info btn-sm text-center " data-toggle="modal" data-target="#listModal">Create a new Todo
+      list. Click here.</button>
+    <button class="btn btn-warning btn-sm text-center ml-2 border border-dark" (click)="undo()">Undo change</button>
   </div>
   <div class="row justify-content-center" *ngIf="selectedFriend!=null">
     <button class=" btn btn-primary btn-sm text-center " (click)="getMyTodos()">Show my Todos.</button>
@@ -75,7 +92,7 @@
 
   <div class="row border border-dark p-2 m-2">
     <h3 class="text-capitalize">{{selectedFriend?selectedFriend.friendName+"'s Todos:":"My Todos:"}}</h3><br>
-    <table class="table table-striped table-sm watcher ">
+    <table class="table table-striped table-sm ">
       <tbody>
         <ul class="list-group " *ngFor="let list of allLists">
           <li class="list-group-item border border-danger"
@@ -209,50 +226,6 @@
   </div>
 </div>
 
-
-<!--  <tr *ngFor="let list of allLists">
-            <td>{{list.listName}}</td>
-            <td><i class="fas fa-plus"  style='color:blue;' (click)="toggleCreateItem(list)"></i></td>
-            <td><i class='fas fa-pen'  (click)="currentlySelected(list)"></i></td>
-            <td><i class='fas fa-trash-alt' style='color:red;' (click)="deleteList(list)"></i></td>
-            <div *ngFor="let item of allItems">
-                <div *ngIf="item.listId==list.listId">
-                  <div>{{item.itemName}}</div>
-                  <i class="fas fa-plus"  style='color:blue;' (click)="toggleCreateSubItem(list,item)"></i>
-                  <i class='fas fa-pen'  (click)="currentlySelected(list,item)"></i>
-                  <i class='fas fa-trash-alt' style='color:red;' (click)="deleteItem(list,item)"></i>                  
-                  <div *ngFor="let subItem of item.subItems">
-                      <div>{{subItem.subItemName}} </div>
-                      <i class='fas fa-pen'  (click)="currentlySelected(list,item,subItem)"></i>
-                      <i class='fas fa-trash-alt' style='color:red;' (click)="deleteSubItem(list,item,subItem)"></i>            
-                  </div>
-                </div>
-            </div>
-          </tr> -->
-
-
-<!-- <div *ngFor="let list of allLists">
-        <div>{{list.listName}} </div>
-        <button class="btn btn-success btn-sm" (click)="toggleCreateItem(list)">new Todo item</button>
-        <button class="btn btn-danger btn-sm" (click)="deleteList(list)">Delete list</button>
-        <button type="button" class="btn btn-primary" (click)="currentlySelected(list)">Edit List</button>
-        <br>
-        <div *ngFor="let item of allItems">
-          <div *ngIf="item.listId==list.listId">
-            <div>{{item.itemName}}</div>
-            <button class="btn btn-success btn-sm" (click)="toggleCreateSubItem(list,item)">new Todo subitem</button>
-            <button class="btn btn-danger btn-sm" (click)="deleteItem(list,item)">Delete item</button>
-            <button type="button" class="btn btn-primary" (click)="currentlySelected(list,item)">
-                Edit item
-            </button>
-            <div *ngFor="let subItem of item.subItems">
-                <div>{{subItem.subItemName}} </div>
-                <button class="btn btn-info btn-sm" (click)="deleteSubItem(list,item,subItem)">Delete subitem</button>
-                <button type="button" class="btn btn-primary" (click)="currentlySelected(list,item,subItem)">
-                    Edit subitem
-                </button>               
-            </div>
-          </div>
-        </div>
-        <br>
-      </div> -->
+<ngx-spinner size="large" color="#fff" type="ball-scale-ripple-multiple" [fullScreen]="true">
+  <p style="color: white"> Waiting for network.. </p>
+</ngx-spinner>

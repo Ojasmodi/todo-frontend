@@ -115,16 +115,20 @@ export class TodoMgmtService {
     })
   }
 
+  public getUndoError = () => {
+    return Observable.create((observer) => {
+      this.socket.on('undo-error', (data) => {
+        observer.next(data);
+      })
+    })
+  }
+
   public getAllFriendList = () => {
     return this.http.get(`${this.url}/api/v1/friend/getAllFriendList`);
   }
 
   public getAllList = (id) => {
     return this.http.get(`${this.url}/api/v1/list/getAllList/${id}`);
-  }
-
-  public undoAction=(id)=>{
-    return this.http.post(`${this.url}/api/v1/history/undoAction/${id}`,null);
   }
 
   public getAllItems = () => {

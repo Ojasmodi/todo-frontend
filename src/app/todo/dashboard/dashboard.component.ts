@@ -30,8 +30,8 @@ export class DashboardComponent implements OnInit {
   selectedItem
   selectedSubItem
   item_subitem
-  mark='open'
-  isList=false;
+  mark = 'open'
+  isList = false;
   selectedFriend = null
   allLists = []
   allItems = []
@@ -51,6 +51,7 @@ export class DashboardComponent implements OnInit {
   updatedSubItemSubs
   getNewFriendRequestSubs
   getNewFriendSubs
+  undoSubs
   disconnectedSocket = true;
 
   constructor(public toastrService: ToastrService, public router: Router, private spinner: NgxSpinnerService,
@@ -63,6 +64,7 @@ export class DashboardComponent implements OnInit {
     this.userId = this.cookieService.get('userId');
     this.userName = this.cookieService.get('userName');
     this.userInfo = this.userManagementService.getUserInfoFromLocalStorage();
+    this.spinner.show();
     this.checkStatus();
     this.verifyUserConfirmation()
     this.getNewFriendRequest();
@@ -76,8 +78,18 @@ export class DashboardComponent implements OnInit {
     this.getUpdatedList();
     this.getUpdatedItem();
     this.getUpdatedSubItem();
+    this.getUndoError();
     this.callDisconnectedSocket();
     //this.spinner.show();
+    //this.getAllUsers();
+    //this.getAllLists(this.userId)
+    //this.getAllItems()
+  }
+
+  getAllUsers = () => {
+    this.allUsers = []
+    this.friendRequest = []
+    this.friends = []
     this.userManagementService.getAllUsers().subscribe((apiResponse) => {
       if (apiResponse['status'] === 200) {
         this.allUsers = apiResponse.data;
@@ -104,17 +116,16 @@ export class DashboardComponent implements OnInit {
         this.toastrService.error("Network problem.")
       }
     );
-    this.getAllLists(this.userId)
-    this.getAllItems()
   }
 
   getAllLists = (userId) => {
+    this.allLists = []
     this.todoService.getAllList(userId).subscribe((apiResponse) => {
       if (apiResponse['status'] === 200) {
         this.allLists = apiResponse['data'];
       }
-      else if(apiResponse['status']==404){
-        this.allLists=[]
+      else if (apiResponse['status'] == 404) {
+        this.allLists = []
         this.toastrService.info("No list found.")
       }
     },
@@ -135,7 +146,7 @@ export class DashboardComponent implements OnInit {
   }
 
   getDeletedList = () => {
-    this.deletedListSubs=this.todoService.getDeletedList().subscribe((apiResponse) => {
+    this.deletedListSubs = this.todoService.getDeletedList().subscribe((apiResponse) => {
       console.log(apiResponse)
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.listCreatorId;
@@ -143,19 +154,23 @@ export class DashboardComponent implements OnInit {
         if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
           this.toastrService.show(`${deletedByUserName} deleted the list named ${apiResponse.data.listName}`)
         }
-        this.modifyList(apiResponse.data,'delete');
+        this.modifyList(apiResponse.data, 'delete');
       }
-      else {
-        if (this.userId == apiResponse.deletedBy) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.deletedBy) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while deleting list")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while deleting list")
+          this.router.navigate(['/servererror']);
         }
       }
     })
   }
 
   getDeletedItem = () => {
-    this.deletedItemSubs=this.todoService.getDeletedItem().subscribe((apiResponse) => {
+    this.deletedItemSubs = this.todoService.getDeletedItem().subscribe((apiResponse) => {
       console.log(apiResponse)
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.itemCreatorId;
@@ -163,19 +178,23 @@ export class DashboardComponent implements OnInit {
         if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
           this.toastrService.show(`${deletedByUserName} deleted the item named ${apiResponse.data.itemName}`)
         }
-        this.modifyItem(apiResponse.data,'delete');
+        this.modifyItem(apiResponse.data, 'delete');
       }
-      else {
-        if (this.userId == apiResponse.deletedBy) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.deletedBy) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while deleting item")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while deleting item")
+          this.router.navigate(['/servererror']);
         }
       }
     })
   }
 
   getDeletedSubItem = () => {
-    this.deletedSubItemSubs=this.todoService.getDeletedSubItem().subscribe((apiResponse) => {
+    this.deletedSubItemSubs = this.todoService.getDeletedSubItem().subscribe((apiResponse) => {
       console.log(apiResponse)
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.subItemCreatorId;
@@ -183,20 +202,24 @@ export class DashboardComponent implements OnInit {
         if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
           this.toastrService.show(`${deletedByUserName} deleted the subitem named ${apiResponse.data.subItemName}`)
         }
-        this.modifySubItem(apiResponse.data,'delete');
+        this.modifySubItem(apiResponse.data, 'delete');
       }
-      else {
-        if (this.userId == apiResponse.deletedBy) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.deletedBy) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while deleting subItem")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while deleting subItem")
+          this.router.navigate(['/servererror']);
         }
       }
     })
   }
 
-  modifyList = (data,op) => {
-    
-    if(op=='delete'){
+  modifyList = (data, op) => {
+
+    if (op == 'delete') {
       for (let u of this.allLists) {
         if (u.listId == data.listId) {
           var removeIndex = this.allLists.map(function (list) { return list.listId; }).indexOf(u.listId);
@@ -204,19 +227,19 @@ export class DashboardComponent implements OnInit {
         }
       }
     }
-    else{
+    else {
       for (let u of this.allLists) {
         if (u.listId == data.listId) {
-          u.listName=data.listName;
-          u.listModifierId=data.modifiedByUserId;
-          u.listModifierName=data.modifiedByUserName
+          u.listName = data.listName;
+          u.listModifierId = data.modifiedByUserId;
+          u.listModifierName = data.modifiedByUserName
         }
       }
-    }   
+    }
   }
 
-  modifySubItem = (data,op) => {
-    if(op=='delete'){
+  modifySubItem = (data, op) => {
+    if (op == 'delete') {
       for (let item of this.allItems) {
         for (let subitem of item.subItems) {
           if (subitem.subItemId == data.subItemId) {
@@ -226,23 +249,23 @@ export class DashboardComponent implements OnInit {
         }
       }
     }
-    else{
+    else {
       for (let item of this.allItems) {
         for (let subitem of item.subItems) {
           if (subitem.subItemId == data.subItemId) {
-            subitem.subItemName=data.subItemName;
-            subitem.subItemDone=data.subItemDone;
-            subitem.subItemModifierId=data.subItemModifierId;
-            subitem.subItemModifierName=data.subItemModifierName
+            subitem.subItemName = data.subItemName;
+            subitem.subItemDone = data.subItemDone;
+            subitem.subItemModifierId = data.subItemModifierId;
+            subitem.subItemModifierName = data.subItemModifierName
           }
         }
       }
     }
-    
+
   }
 
-  modifyItem = (data,op) => {
-    if(op=='delete'){
+  modifyItem = (data, op) => {
+    if (op == 'delete') {
       for (let u of this.allItems) {
         if (u.itemId == data.itemId) {
           var removeIndex = this.allItems.map(function (item) { return item.itemId; }).indexOf(u.itemId);
@@ -250,49 +273,58 @@ export class DashboardComponent implements OnInit {
         }
       }
     }
-    else{
+    else {
       for (let u of this.allItems) {
         if (u.itemId == data.itemId) {
-          u.itemName=data.itemName;
-          u.itemDone=data.itemDone;
-          u.itemModifierId=data.itemModifierId;
-          u.itemModifierId=data.itemModifierId
+          u.itemName = data.itemName;
+          u.itemDone = data.itemDone;
+          u.itemModifierId = data.itemModifierId;
+          u.itemModifierId = data.itemModifierId
         }
       }
-    }  
+    }
   }
 
   getNewSubItem = () => {
-    this.getNewSubItemSubs=this.todoService.getNewSubItem().subscribe((apiResponse) => {
+    this.getNewSubItemSubs = this.todoService.getNewSubItem().subscribe((apiResponse) => {
+      console.log(apiResponse)
       this.item_subitem = '';
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.subItemCreatorId;
         let createdByUserName = apiResponse.data.subItemCreatorName;
-        if(this.userId==createdByUserId){
+        if (this.userId == createdByUserId) {
           $('#addModal').modal('hide');
         }
-        if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
+        if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
+          console.log("undo")
+          this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
+        }
+        else if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
           this.toastrService.show(`${createdByUserName} created a new subitem ${apiResponse.data.subItemName}`)
         }
         this.addNewSubItem(apiResponse.data);
       }
-      else {
-        if (this.userId == apiResponse.data.subItemCreatorId) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.data.subItemCreatorId) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while creating new subitem.")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while creating new subitem.")
+          this.router.navigate(['/servererror']);
         }
       }
     })
   }
 
   getNewItem = () => {
-    this.getNewItemSubs=this.todoService.getNewItem().subscribe((apiResponse) => {
+    this.getNewItemSubs = this.todoService.getNewItem().subscribe((apiResponse) => {
       console.log(apiResponse)
       this.item_subitem = '';
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.itemCreatorId;
         let createdByUserName = apiResponse.data.itemCreatorName;
-        if(this.userId==createdByUserId){
+        if (this.userId == createdByUserId) {
           $('#addModal').modal('hide');
         }
         if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
@@ -300,10 +332,14 @@ export class DashboardComponent implements OnInit {
         }
         this.addNewItem(apiResponse.data);
       }
-      else {
-        if (this.userId == apiResponse.data.subItemCreatorId) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.data.ItemCreatorId) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while creating new Item.")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while creating new Item.")
+          this.router.navigate(['/servererror']);
         }
       }
     })
@@ -317,70 +353,82 @@ export class DashboardComponent implements OnInit {
     return false;
   }
 
-  getUpdatedList =()=>{
-    this.updatedListSubs=this.todoService.getUpdatedList().subscribe((apiResponse) => {
-      console.log(apiResponse)      
+  getUpdatedList = () => {
+    this.updatedListSubs = this.todoService.getUpdatedList().subscribe((apiResponse) => {
+      console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.listModifierId;
         let modifiedByUserName = apiResponse.data.listModifierName;
-        if(this.userId==modifiedByUserId){
+        if (this.userId == modifiedByUserId) {
           $('#exampleModalCenter').modal('hide');
         }
         if (this.isFriend(modifiedByUserId) || modifiedByUserId == this.userId) {
           this.toastrService.show(`${modifiedByUserName} updated the list ${apiResponse.data.listName}`)
         }
-        this.modifyList(apiResponse.data,'modify');
+        this.modifyList(apiResponse.data, 'modify');
       }
-      else {
-        if (this.userId == apiResponse.data.listModifierId) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.data.listModifierId) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while updating list.")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while updating list.")
+          this.router.navigate(['/servererror']);
         }
       }
     })
   }
 
-  getUpdatedItem=()=>{
-    this.updatedItemSubs=this.todoService.getUpdatedItem().subscribe((apiResponse) => {
+  getUpdatedItem = () => {
+    this.updatedItemSubs = this.todoService.getUpdatedItem().subscribe((apiResponse) => {
       console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.itemModifierId;
         let modifiedByUserName = apiResponse.data.itemModifierName;
-        if(this.userId==modifiedByUserId){
+        if (this.userId == modifiedByUserId) {
           $('#exampleModalCenter').modal('hide');
         }
         if (this.isFriend(modifiedByUserId) || modifiedByUserId == this.userId) {
           this.toastrService.show(`${modifiedByUserName} updated the item ${apiResponse.data.itemName}`)
         }
-        this.modifyItem(apiResponse.data,'modify');
+        this.modifyItem(apiResponse.data, 'modify');
       }
-      else {
-        if (this.userId == apiResponse.data.itemModifierId) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.data.itemModifierId) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while updating item.")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while updating item.")
+          this.router.navigate(['/servererror']);
         }
       }
     })
   }
 
-  getUpdatedSubItem=()=>{
-    this.updatedSubItemSubs=this.todoService.getUpdatedSubItem().subscribe((apiResponse) => {
+  getUpdatedSubItem = () => {
+    this.updatedSubItemSubs = this.todoService.getUpdatedSubItem().subscribe((apiResponse) => {
       console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.subItemModifierId;
         let modifiedByUserName = apiResponse.data.subItemModifierName;
-        if(this.userId==modifiedByUserId){
+        if (this.userId == modifiedByUserId) {
           $('#exampleModalCenter').modal('hide');
         }
         if (this.isFriend(modifiedByUserId) || modifiedByUserId == this.userId) {
           this.toastrService.show(`${modifiedByUserName} updated the subitem ${apiResponse.data.subItemName}`)
         }
-        this.modifySubItem(apiResponse.data,'modify');
+        this.modifySubItem(apiResponse.data, 'modify');
       }
-      else {
-        if (this.userId == apiResponse.data.subItemModifierId) {
-          this.toastrService.error("Error while creating new list.")
-          this.router.navigateByUrl('notfound')
+      else if (this.userId == apiResponse.data.subItemModifierId) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while updating subitem.")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while updating subitem.")
+          this.router.navigate(['/servererror']);
         }
       }
     })
@@ -388,7 +436,7 @@ export class DashboardComponent implements OnInit {
 
   addNewSubItem = (data) => {
     for (let item of this.allItems) {
-      if (item['itemId'] == data.itemId) {
+      if (item['itemId'] == data.parentItemId) {
         delete data.itemId;
         item['subItems'].push(data);
       }
@@ -405,21 +453,21 @@ export class DashboardComponent implements OnInit {
 
   currentlySelected = (list, item = 0, subitem = 0) => {
     if (item == 0 && subitem == 0) {
-      this.isList=true;
+      this.isList = true;
       this.selectedList = list;
       this.selectedItem = 0;
       this.selectedSubItem = 0;
       this.toBeEditedText = list.listName;
     }
     else if (subitem == 0) {
-      this.isList=false
+      this.isList = false
       this.selectedList = list;
       this.selectedItem = item;
       this.selectedSubItem = 0;
       this.toBeEditedText = item['itemName'];
     }
     else {
-      this.isList=false
+      this.isList = false
       this.selectedItem = item;
       this.selectedSubItem = subitem;
       this.selectedList = list;
@@ -428,8 +476,11 @@ export class DashboardComponent implements OnInit {
   }
 
   update = () => {
-    if (this.toBeEditedText.length == 0) {
-      this.toastrService.warning("Enter name")
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
+    }
+    else if (!this.toBeEditedText || this.toBeEditedText.length == 0) {
+      this.toastrService.warning("Enter some text.")
     }
     else if (this.selectedItem == 0 && this.selectedSubItem == 0) {
       let data = {
@@ -447,7 +498,7 @@ export class DashboardComponent implements OnInit {
         itemId: this.selectedItem.itemId,
         itemModifierName: this.userName,
         itemModifierId: this.userId,
-        itemDone:this.mark
+        itemDone: this.mark
       }
       this.todoService.emitEvent('update-item', data)
     }
@@ -459,7 +510,7 @@ export class DashboardComponent implements OnInit {
         subItemId: this.selectedSubItem.subItemId,
         subItemModifierName: this.userName,
         subItemModifierId: this.userId,
-        subItemDone:this.mark
+        subItemDone: this.mark
       }
       this.todoService.emitEvent('update-subitem', data)
     }
@@ -467,7 +518,10 @@ export class DashboardComponent implements OnInit {
   }
 
   additem_subitem = () => {
-    if (this.item_subitem.length == 0) {
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
+    }
+    else if (!this.item_subitem || this.item_subitem.length == 0) {
       this.toastrService.warning("Enter some text.")
     }
     else if (this.selectedSubItem == 0 && this.selectedItem == 0) {
@@ -476,7 +530,8 @@ export class DashboardComponent implements OnInit {
         listId: this.selectedList.listId,
         itemName: this.item_subitem,
         itemCreatorId: this.userId,
-        itemCreatorName: this.userName
+        itemCreatorName: this.userName,
+        itemBelongsTo: this.selectedFriend ? this.selectedFriend.friendId : this.userId
       }
       this.todoService.emitEvent('create-item', data);
     }
@@ -487,85 +542,134 @@ export class DashboardComponent implements OnInit {
         subItemName: this.item_subitem,
         subItemCreatorId: this.userId,
         subItemCreatorName: this.userName,
+        subItemBelongsTo: this.selectedFriend ? this.selectedFriend.friendId : this.userId
       }
       this.todoService.emitEvent('create-subitem', data);
     }
   }
 
   deleteSubItem = (list, item, subItem) => {
-    let data = {
-      listId: list.listId,
-      itemId: item.itemId,
-      subItemId: subItem.subItemId,
-      subItem: subItem,
-      deletedBy: this.userName
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
     }
-    this.todoService.emitEvent('delete-subitem', data);
+    else {
+      let data = {
+        listId: list.listId,
+        itemId: item.itemId,
+        subItemId: subItem.subItemId,
+        subItem: subItem,
+        type: 'subItem',
+        deletedBy: this.userName
+      }
+      this.todoService.emitEvent('delete-subitem', data);
+    }
   }
 
   createList = () => {
-    if (!this.listName || this.listName.length == 0) {
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
+    }
+    else if (!this.listName || this.listName.length == 0) {
       this.toastrService.warning("Enter list name")
     }
     else {
       let data = {
         listName: this.listName,
         listCreatorId: this.userId,
-        listCreatorName: this.userName
+        listCreatorName: this.userName,
+        listBelongsTo: this.userId
       }
       this.todoService.emitEvent('create-list', data);
     }
   }
 
   getNewList = () => {
-    this.getNewListSubs=this.todoService.getNewList().subscribe((apiResponse) => {
+    this.getNewListSubs = this.todoService.getNewList().subscribe((apiResponse) => {
       if (apiResponse.status == 200) {
-        if(this.userId==apiResponse.data.listCreatorId){
+        if (this.userId == apiResponse.data.listCreatorId) {
           $('#listModal').modal('hide');
           this.allLists.push(apiResponse.data)
         }
-        if(this.selectedFriend!=null && this.selectedFriend.friendId==apiResponse.data.listCreatorId ){
+        if (this.selectedFriend != null && this.selectedFriend.friendId == apiResponse.data.listCreatorId) {
           this.allLists.push(apiResponse.data)
         }
         this.listName = ""
         this.toastrService.show(`${apiResponse.data.listCreatorName} created a  new Todo-list ${apiResponse.data.listName}`);
       }
-      else {
-        this.toastrService.error("Error while creating new list.")
+      else if (this.userId == apiResponse.data.listCreatorId) {
+        if (apiResponse.status == 404) {
+          this.toastrService.error("Error while creating list")
+          this.router.navigate(['/notfound']);
+        }
+        else if (apiResponse.status == 500) {
+          this.toastrService.error("Error while creating list.")
+          this.router.navigate(['/servererror']);
+        }
       }
-    },
-      (err) => {
-        this.toastrService.error("Error while creating new list.", "Check connection.")
-      })
+    })
   }
 
   deleteList = (list) => {
-    let data = {
-      listId: list.listId,
-      deletedBy: this.userName
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
     }
-    this.todoService.emitEvent('delete-list', data);
+    else {
+      let data = {
+        listId: list.listId,
+        deletedBy: this.userName,
+        list: list,
+        type: 'list'
+      }
+      this.todoService.emitEvent('delete-list', data);
+    }
   }
 
   deleteItem = (list, Item) => {
-    let data = {
-      listId: list.listId,
-      itemId: Item.itemId,
-      deletedBy: this.userName
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
     }
-    this.todoService.emitEvent('delete-item', data);
+    else {
+      let data = {
+        listId: list.listId,
+        itemId: Item.itemId,
+        item: Item,
+        type: 'item',
+        deletedBy: this.userName
+      }
+      this.todoService.emitEvent('delete-item', data);
+    }
   }
 
-  undo=()=>{
-    if(this.selectedFriend==null){
-      this.todoService.undoAction(this.userId);
-      this.getAllLists(this.userId)
+  undo = () => {
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
     }
-    else{
-      this.todoService.undoAction(this.selectedFriend.friendId);
-      this.getAllLists(this.selectedFriend.friendId)
+    else if (this.selectedFriend == null) {
+      let data = {
+        userId: this.userId,
+        userName: this.userName
+      }
+      this.todoService.emitEvent('undo', data)
     }
-    this.getAllItems();
+    else {
+      let data = {
+        userId: this.selectedFriend.friendId,
+        userName: this.userName
+      }
+      this.todoService.emitEvent('undo', data)
+    }
+  }
+
+  getUndoError = () => {
+    this.undoSubs = this.getNewItemSubs = this.todoService.getUndoError().subscribe((apiResponse) => {
+      console.log(apiResponse)
+      if (apiResponse.status == 404) {
+        let createdByUserId = apiResponse.data.changeDoneById;
+        if (createdByUserId == this.userId) {
+          this.toastrService.show(apiResponse.message)
+        }
+      }
+    })
   }
 
 
@@ -581,7 +685,7 @@ export class DashboardComponent implements OnInit {
           }
         }
       }
-      if (f.status=='friend' ) {
+      if (f.status == 'friend') {
         // removing users who are in friend status
         for (let u of this.allUsers) {
           if (u.userId == f.user1Id) {
@@ -614,7 +718,7 @@ export class DashboardComponent implements OnInit {
           }
           this.friends.push(this.friendDetails)
         }
-        
+
       }
       console.log(this.friends)
     }
@@ -637,8 +741,12 @@ export class DashboardComponent implements OnInit {
     this.todoService.verifyUser()
       .subscribe((data) => {
         this.disconnectedSocket = false;
+        this.spinner.hide();
+        this.getAllUsers();
+        this.selectedFriend ? this.getAllLists(this.selectedFriend.friendId) : this.getAllLists(this.userId);
+        this.getAllItems()
         this.toastrService.success("Connection is live.")
-        this.todoService.emitEvent('set-user',this.authToken)
+        this.todoService.emitEvent('set-user', this.authToken)
       });
   }
 
@@ -653,12 +761,12 @@ export class DashboardComponent implements OnInit {
         user2Id: user.userId,
         user2Name: `${user.firstName} ${user.lastName}`
       }
-      this.todoService.emitEvent('send-request',data)
+      this.todoService.emitEvent('send-request', data)
     }
   }
 
   public getNewFriendRequest = () => {
-    this.getNewFriendRequestSubs=this.todoService.getNewFriendRequest().subscribe((apiResponse) => {
+    this.getNewFriendRequestSubs = this.todoService.getNewFriendRequest().subscribe((apiResponse) => {
       console.log(apiResponse)
       if (apiResponse.status == 200) {
         if (apiResponse.data.user1Id == this.userId) {
@@ -694,7 +802,7 @@ export class DashboardComponent implements OnInit {
   }
 
   public getNewFriend = () => {
-    this.getNewFriendSubs=this.todoService.getNewFriend().subscribe((apiResponse) => {
+    this.getNewFriendSubs = this.todoService.getNewFriend().subscribe((apiResponse) => {
       console.log(apiResponse)
       if (apiResponse.status == 200) {
         if (apiResponse.data.user1Id == this.userId) {
@@ -742,15 +850,25 @@ export class DashboardComponent implements OnInit {
   }
 
   public getFriendTodos = (user) => {
-    this.selectedFriend = user;
-    this.getAllLists(user.friendId);
-    this.getAllItems();
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
+    }
+    else {
+      this.selectedFriend = user;
+      this.getAllLists(user.friendId);
+      this.getAllItems();
+    }
   }
 
   public getMyTodos = () => {
-    this.selectedFriend = null
-    this.getAllLists(this.userId);
-    this.getAllItems();
+    if (this.disconnectedSocket == true) {
+      this.toastrService.error("Network problem.")
+    }
+    else {
+      this.selectedFriend = null
+      this.getAllLists(this.userId);
+      this.getAllItems();
+    }
   }
 
   // function to logout user
@@ -779,12 +897,14 @@ export class DashboardComponent implements OnInit {
   callDisconnectedSocket = () => {
     this.liveConSubs = this.todoService.disconnectedSocket().subscribe(() => {
       this.disconnectedSocket = true;
+      this.spinner.show();
       this.toastrService.error("Connection-lost", 'Check network-connection');
     })
   }
 
   ngOnDestroy() {
     this.liveConSubs.unsubscribe();
+    this.undoSubs.unsubscribe();
     this.deletedListSubs.unsubscribe();
     this.deletedItemSubs.unsubscribe();
     this.deletedSubItemSubs.unsubscribe();
