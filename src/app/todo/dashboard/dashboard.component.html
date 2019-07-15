@@ -95,57 +95,54 @@
 
   <div class="row border border-dark p-2 m-2 text">
     <h3 class="text-capitalize">{{selectedFriend?selectedFriend.friendName+"'s Todos:":"My Todos:"}}</h3><br>
-    <table class="table table-sm  ">
+    <table class="table table-sm table-responsive-md ">
       <tbody>
         <ul class="list-group clearfix" *ngFor="let list of allLists">
           <li class="list-group-item border border-danger"
             style="background-color: rgb(86, 75, 184);color: white;margin-bottom: 1px;">{{list.listName}}
-            <span class="float-right">
-              <span data-toggle="tooltip" data-placement="top" title="Add item">
-                <i class="fas fa-plus margin-button" style='color:yellowgreen;' (click)="currentlySelected(list)"
-                  data-toggle="modal" data-target="#addModal"></i>
-              </span>
-              <span data-toggle="tooltip" data-placement="top" title="Edit list">
-                <i class='fas fa-pen margin-button' (click)="currentlySelected(list)" data-toggle="modal"
-                  data-target="#exampleModalCenter"></i>
-              </span>
-              <span data-toggle="tooltip" data-placement="top" title="Delete List">
-                <i class='fas fa-trash-alt margin-button' style='color:red;' (click)="deleteList(list)"></i>
-              </span>
+            <span class="float-right dropup">
+              <i class="fa fa-ellipsis-v margin-button dropup-toggle" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false"></i>
+              <div class="dropdown-menu">
+                <h6 class="dropdown-header">Actions</h6>
+                <div class="dropdown-item" (click)="currentlySelected(list)" data-toggle="modal"
+                  data-target="#addModal">Add item</div>
+                <div class="dropdown-item" (click)="currentlySelected(list)" data-toggle="modal"
+                  data-target="#exampleModalCenter">Edit list</div>
+                <div class="dropdown-item" (click)="deleteList(list)">Delete list</div>
+              </div>
             </span></li>
           <ul class="list-group clearfix" style="margin-left: 1rem;" *ngFor="let item of allItems">
             <span *ngIf="item.listId==list.listId">
               <li class="list-group-item  border border-info"
-                style="background-color: rgb(54, 15, 128);color: white;margin-bottom: 1px;">{{item.itemName}}
+                style="background-color: rgb(54, 15, 128);color: white;margin-bottom: 1px;">{{item.itemName}}-<b class="margin-button">{{item.itemDone=='open'?'Open':'Done'}}</b>
                 <span class="float-right">
-                  <span data-toggle="tooltip" data-placement="top" title="Add subItem">
-                    <i class="fas fa-plus margin-button" style='color:yellowgreen;'
-                      (click)="currentlySelected(list,item)" data-toggle="modal" data-target="#addModal"></i>
-                  </span>
                   
-                  <b>{{item.itemDone=='open'?'Open':'Done'}}</b>
-                  <span data-toggle="tooltip" data-placement="top" title="Edit Item">
-                    <i class='fas fa-pen margin-button' (click)="currentlySelected(list,item)" data-toggle="modal"
-                      data-target="#exampleModalCenter"></i>
-                  </span>
-                  <span data-toggle="tooltip" data-placement="top" title="Delete Item">
-                    <i class='fas fa-trash-alt margin-button' style='color:red;' (click)="deleteItem(list,item)"></i>
-                  </span>
+                  <i class="fa fa-ellipsis-v margin-button dropup-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false"></i>
+                  <div class="dropdown-menu">
+                    <h6 class="dropdown-header">Actions</h6>
+                    <div class="dropdown-item" (click)="currentlySelected(list,item)" data-toggle="modal"
+                      data-target="#addModal">Add Subitem</div>
+                    <div class="dropdown-item" (click)="currentlySelected(list,item)" data-toggle="modal"
+                      data-target="#exampleModalCenter">Edit item</div>
+                    <div class="dropdown-item" (click)="deleteItem(list,item)">Delete list</div>
+                  </div>
                 </span></li>
               <ul class="list-group clearfix" style="margin-left: 1rem;" *ngFor="let subItem of item.subItems">
                 <li class="list-group-item border border-dark"
-                  style="background-color: rgb(131, 21, 98);color: white;margin-bottom: 1px;">{{subItem.subItemName}}
+                  style="background-color: rgb(131, 21, 98);color: white;margin-bottom: 1px;">{{subItem.subItemName}}-<b class="margin-button">{{subItem.subItemDone=='open'?'Open':'Done'}}</b>
                   <span class="float-right">
                     
-                    <span data-toggle="tooltip" data-placement="top" title="Edit SubItem">
-                      <i class='fas fa-pen margin-button' (click)="currentlySelected(list,item,subItem)"
-                        data-toggle="modal" data-target="#exampleModalCenter"></i>
-                    </span>
-                    <b>{{subItem.subItemDone=='open'?'Open':'Done'}}</b>
-                    <span data-toggle="tooltip" data-placement="top" title="Delete SubItem">
-                      <i class='fas fa-trash-alt margin-button' style='color:red;'
-                        (click)="deleteSubItem(list,item,subItem)"></i>
-                    </span>
+                    <i class="fa fa-ellipsis-v margin-button dropup-toggle" data-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false"></i>
+                    <div class="dropdown-menu">
+                      <h6 class="dropdown-header">Actions</h6>
+                      <div class="dropdown-item" (click)="currentlySelected(list,item,subItem)" data-toggle="modal"
+                        data-target="#exampleModalCenter">Edit SubItem</div>
+
+                      <div class="dropdown-item" (click)="deleteSubItem(list,item,subItem)">Delete SubItem</div>
+                    </div>
                   </span></li>
               </ul>
             </span>

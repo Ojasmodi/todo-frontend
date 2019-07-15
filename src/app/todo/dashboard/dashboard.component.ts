@@ -6,7 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Subscription } from 'rxjs';
 import { TodoMgmtService } from './todo-mgmt.service'
-declare var $: any
+declare let $: any
 
 @Component({
   selector: 'app-dashboard',
@@ -212,7 +212,7 @@ export class DashboardComponent implements OnInit {
     if (op == 'delete') {
       for (let u of this.allLists) {
         if (u.listId == data.listId) {
-          var removeIndex = this.allLists.map(function (list) { return list.listId; }).indexOf(u.listId);
+          let removeIndex = this.allLists.map(function (list) { return list.listId; }).indexOf(u.listId);
           this.allLists.splice(removeIndex, 1)
         }
       }
@@ -234,7 +234,7 @@ export class DashboardComponent implements OnInit {
       for (let item of this.allItems) {
         for (let subitem of item.subItems) {
           if (subitem.subItemId == data.subItemId) {
-            var removeIndex = item.subItems.map(function (ite) { return ite.subItemId; }).indexOf(subitem.subItemId);
+            let removeIndex = item.subItems.map(function (ite) { return ite.subItemId; }).indexOf(subitem.subItemId);
             item.subItems.splice(removeIndex, 1)
           }
         }
@@ -260,7 +260,7 @@ export class DashboardComponent implements OnInit {
     if (op == 'delete') {
       for (let u of this.allItems) {
         if (u.itemId == data.itemId) {
-          var removeIndex = this.allItems.map(function (item) { return item.itemId; }).indexOf(u.itemId);
+          let removeIndex = this.allItems.map(function (item) { return item.itemId; }).indexOf(u.itemId);
           this.allItems.splice(removeIndex, 1)
         }
       }
@@ -598,11 +598,11 @@ export class DashboardComponent implements OnInit {
       if (apiResponse.status == 200) {
         if (this.userId == apiResponse.data.listCreatorId) {
           $('#listModal').modal('hide');
-          this.allLists.push(apiResponse.data)
         }
         if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
           // console.log("undo")
           this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
+          this.allLists.push(apiResponse.data)
         }
         else if (this.selectedFriend != null && this.selectedFriend.friendId == apiResponse.data.listCreatorId) {
           this.allLists.push(apiResponse.data)
@@ -692,22 +692,22 @@ export class DashboardComponent implements OnInit {
 
   // function to seperate objects based on friend and request status
   public seperateRequestAndFriendsForCurrentUser = (friendList) => {
-    //// console.log(friendList)
+    //console.log(friendList)
     for (let f of friendList) {
-      if (this.userId == f.user1Id) {
+      /* if (this.userId == f.user1Id) {
         // removing users who are in friend status
         for (let u of this.allUsers) {
           if (u.userId == f.user2Id) {
-            var removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
+            let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
             this.allUsers.splice(removeIndex, 1)
           }
         }
-      }
+      } */
       if (f.status == 'friend') {
         // removing users who are in friend status
         for (let u of this.allUsers) {
-          if (u.userId == f.user1Id) {
-            var removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
+          if (u.userId == f.user2Id || u.userId == f.user1Id) {
+            let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
             this.allUsers.splice(removeIndex, 1)
           }
         }
@@ -716,7 +716,7 @@ export class DashboardComponent implements OnInit {
         this.friendRequest.push(f)
         for (let u of this.allUsers) {
           if (u.userId == f.user1Id) {
-            var removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
+            let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
             this.allUsers.splice(removeIndex, 1)
           }
         }
@@ -793,7 +793,7 @@ export class DashboardComponent implements OnInit {
           this.toastrService.success('Request send successfully.')
           for (let user of this.allUsers) {
             if (user.userId === apiResponse.data.user2Id) {
-              var removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(user.userId);
+              let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(user.userId);
               this.allUsers.splice(removeIndex, 1)
             }
           }
@@ -803,7 +803,7 @@ export class DashboardComponent implements OnInit {
           this.friendRequest.push(apiResponse.data)
           for (let u of this.allUsers) {
             if (u.userId == apiResponse.data.user1Id) {
-              var removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
+              let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
               this.allUsers.splice(removeIndex, 1)
             }
           }
@@ -838,7 +838,7 @@ export class DashboardComponent implements OnInit {
           this.toastrService.info(`You are now friend with ${apiResponse.data.user1Name}`)
           for (let u of this.friendRequest) {
             if (u.user1Id == apiResponse.data.user1Id) {
-              var removeIndex = this.friendRequest.map(function (user) { return user.user1Id; }).indexOf(u.user1Id);
+              let removeIndex = this.friendRequest.map(function (user) { return user.user1Id; }).indexOf(u.user1Id);
               this.friendRequest.splice(removeIndex, 1)
             }
           }
