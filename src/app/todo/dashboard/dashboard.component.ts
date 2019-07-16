@@ -91,7 +91,9 @@ export class DashboardComponent implements OnInit {
     this.userManagementService.getAllUsers().subscribe((apiResponse) => {
       if (apiResponse['status'] === 200) {
         this.allUsers = apiResponse.data;
+        //console.log(this.allUsers)
         this.todoService.getAllFriendList().subscribe((apiResponse) => {
+          //console.log(apiResponse)
           if (apiResponse['status'] === 200) {
             this.friendsPending = apiResponse['data'];
             // console.log(this.friendsPending)
@@ -703,15 +705,10 @@ export class DashboardComponent implements OnInit {
           }
         }
       } */
-      if (f.status == 'friend') {
+     /*  if (f.status == 'friend') {
         // removing users who are in friend status
-        for (let u of this.allUsers) {
-          if (u.userId == f.user2Id || u.userId == f.user1Id) {
-            let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
-            this.allUsers.splice(removeIndex, 1)
-          }
-        }
-      }
+        
+      } */
       if (f.status == 'request' && f.user2Id == this.userId) {
         this.friendRequest.push(f)
         for (let u of this.allUsers) {
@@ -722,6 +719,7 @@ export class DashboardComponent implements OnInit {
         }
       }
       else if (f.status == 'friend') {
+        
         if (f.user1Id == this.userId) {
           this.friendDetails = {
             friendId: f.user2Id,
@@ -735,6 +733,15 @@ export class DashboardComponent implements OnInit {
             friendName: f.user1Name
           }
           this.friends.push(this.friendDetails)
+        }
+        for (let u of this.allUsers) {
+          for(let f of this.friends){
+            if (u.userId == f.friendId) {
+              let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
+              this.allUsers.splice(removeIndex, 1)
+            }
+          }
+          
         }
 
       }
