@@ -600,9 +600,12 @@ export class DashboardComponent implements OnInit {
       if (apiResponse.status == 200) {
         if (this.userId == apiResponse.data.listCreatorId) {
           $('#listModal').modal('hide');
+          this.allLists.push(apiResponse.data)
+          this.listName = ""
+          this.toastrService.show(`${apiResponse.data.listCreatorName} created a  new Todo-list ${apiResponse.data.listName}`);
+
         }
         if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
-          // console.log("undo")
           this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
           this.allLists.push(apiResponse.data)
         }
@@ -696,19 +699,6 @@ export class DashboardComponent implements OnInit {
   public seperateRequestAndFriendsForCurrentUser = (friendList) => {
     //console.log(friendList)
     for (let f of friendList) {
-      /* if (this.userId == f.user1Id) {
-        // removing users who are in friend status
-        for (let u of this.allUsers) {
-          if (u.userId == f.user2Id) {
-            let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
-            this.allUsers.splice(removeIndex, 1)
-          }
-        }
-      } */
-     /*  if (f.status == 'friend') {
-        // removing users who are in friend status
-        
-      } */
       if (f.status == 'request' && f.user2Id == this.userId) {
         this.friendRequest.push(f)
         for (let u of this.allUsers) {
@@ -719,7 +709,6 @@ export class DashboardComponent implements OnInit {
         }
       }
       else if (f.status == 'friend') {
-        
         if (f.user1Id == this.userId) {
           this.friendDetails = {
             friendId: f.user2Id,
@@ -735,13 +724,13 @@ export class DashboardComponent implements OnInit {
           this.friends.push(this.friendDetails)
         }
         for (let u of this.allUsers) {
-          for(let f of this.friends){
+          for (let f of this.friends) {
             if (u.userId == f.friendId) {
               let removeIndex = this.allUsers.map(function (user) { return user.userId; }).indexOf(u.userId);
               this.allUsers.splice(removeIndex, 1)
             }
           }
-          
+
         }
 
       }
@@ -896,9 +885,9 @@ export class DashboardComponent implements OnInit {
       this.toastrService.error("Network problem.")
     }
     else {
-      this.selectedFriend = null
       this.getAllLists(this.userId);
       this.getAllItems();
+      this.selectedFriend = null
     }
   }
 
