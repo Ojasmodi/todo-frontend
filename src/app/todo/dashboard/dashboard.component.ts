@@ -91,12 +91,9 @@ export class DashboardComponent implements OnInit {
     this.userManagementService.getAllUsers().subscribe((apiResponse) => {
       if (apiResponse['status'] === 200) {
         this.allUsers = apiResponse.data;
-        //console.log(this.allUsers)
         this.todoService.getAllFriendList().subscribe((apiResponse) => {
-          //console.log(apiResponse)
           if (apiResponse['status'] === 200) {
             this.friendsPending = apiResponse['data'];
-            // console.log(this.friendsPending)
             this.seperateRequestAndFriendsForCurrentUser(this.friendsPending);
           }
         },
@@ -186,7 +183,6 @@ export class DashboardComponent implements OnInit {
   // event for getting deleted subitem
   getDeletedSubItem = () => {
     this.deletedSubItemSubs = this.todoService.getDeletedSubItem().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.subItemCreatorId;
         let deletedByUserName = apiResponse.deletedBy;
@@ -282,7 +278,6 @@ export class DashboardComponent implements OnInit {
   // event to get new subitem
   getNewSubItem = () => {
     this.getNewSubItemSubs = this.todoService.getNewSubItem().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       this.item_subitem = '';
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.subItemCreatorId;
@@ -291,7 +286,6 @@ export class DashboardComponent implements OnInit {
           $('#addModal').modal('hide');
         }
         if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
-          // console.log("undo")
           this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
         }
         else if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
@@ -315,7 +309,6 @@ export class DashboardComponent implements OnInit {
   // event to get new item
   getNewItem = () => {
     this.getNewItemSubs = this.todoService.getNewItem().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       this.item_subitem = '';
       if (apiResponse.status == 200) {
         let createdByUserId = apiResponse.data.itemCreatorId;
@@ -324,7 +317,6 @@ export class DashboardComponent implements OnInit {
           $('#addModal').modal('hide');
         }
         if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
-          // console.log("undo")
           this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
         }
         else if (this.isFriend(createdByUserId) || createdByUserId == this.userId) {
@@ -357,7 +349,6 @@ export class DashboardComponent implements OnInit {
   // event for getting updated list
   getUpdatedList = () => {
     this.updatedListSubs = this.todoService.getUpdatedList().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.listModifierId;
         let modifiedByUserName = apiResponse.data.listModifierName;
@@ -385,7 +376,6 @@ export class DashboardComponent implements OnInit {
   // event for getting updated item
   getUpdatedItem = () => {
     this.updatedItemSubs = this.todoService.getUpdatedItem().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.itemModifierId;
         let modifiedByUserName = apiResponse.data.itemModifierName;
@@ -413,7 +403,6 @@ export class DashboardComponent implements OnInit {
   // event for getting updated subitem
   getUpdatedSubItem = () => {
     this.updatedSubItemSubs = this.todoService.getUpdatedSubItem().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         let modifiedByUserId = apiResponse.data.subItemModifierId;
         let modifiedByUserName = apiResponse.data.subItemModifierName;
@@ -534,7 +523,6 @@ export class DashboardComponent implements OnInit {
       this.toastrService.warning("Enter some text.")
     }
     else if (this.selectedSubItem == 0 && this.selectedItem == 0) {
-      // console.log("item")
       let data = {
         listId: this.selectedList.listId,
         itemName: this.item_subitem,
@@ -545,7 +533,6 @@ export class DashboardComponent implements OnInit {
       this.todoService.emitEvent('create-item', data);
     }
     else {
-      // console.log("subitem")
       let data = {
         itemId: this.selectedItem.itemId,
         subItemName: this.item_subitem,
@@ -598,16 +585,15 @@ export class DashboardComponent implements OnInit {
   getNewList = () => {
     this.getNewListSubs = this.todoService.getNewList().subscribe((apiResponse) => {
       if (apiResponse.status == 200) {
-        if (this.userId == apiResponse.data.listCreatorId) {
+        if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
+          this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
+          this.allLists.push(apiResponse.data)
+        }
+        else if (this.userId == apiResponse.data.listCreatorId) {
           $('#listModal').modal('hide');
           this.allLists.push(apiResponse.data)
           this.listName = ""
           this.toastrService.show(`${apiResponse.data.listCreatorName} created a  new Todo-list ${apiResponse.data.listName}`);
-
-        }
-        if (apiResponse.data.undo == true && (apiResponse.data.changeDoneById == this.userId || this.isFriend(apiResponse.data.changeDoneById))) {
-          this.toastrService.show(`${apiResponse.data.changeDoneById == this.userId ? 'You' : apiResponse.data.changeDoneByName} made an undo change.`)
-          this.allLists.push(apiResponse.data)
         }
         else if (this.selectedFriend != null && this.selectedFriend.friendId == apiResponse.data.listCreatorId) {
           this.allLists.push(apiResponse.data)
@@ -685,7 +671,6 @@ export class DashboardComponent implements OnInit {
   // function to get undo_error after undo action
   getUndoError = () => {
     this.undoSubs = this.getNewItemSubs = this.todoService.getUndoError().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       if (apiResponse.status == 404) {
         let createdByUserId = apiResponse.data.changeDoneById;
         if (createdByUserId == this.userId) {
@@ -697,7 +682,6 @@ export class DashboardComponent implements OnInit {
 
   // function to seperate objects based on friend and request status
   public seperateRequestAndFriendsForCurrentUser = (friendList) => {
-    //console.log(friendList)
     for (let f of friendList) {
       if (f.status == 'request' && f.user2Id == this.userId) {
         this.friendRequest.push(f)
@@ -730,11 +714,8 @@ export class DashboardComponent implements OnInit {
               this.allUsers.splice(removeIndex, 1)
             }
           }
-
         }
-
       }
-      // console.log(this.friends)
     }
   }
 
@@ -783,7 +764,6 @@ export class DashboardComponent implements OnInit {
   // function to  get new friend request
   public getNewFriendRequest = () => {
     this.getNewFriendRequestSubs = this.todoService.getNewFriendRequest().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         if (apiResponse.data.user1Id == this.userId) {
           this.toastrService.success('Request send successfully.')
@@ -803,7 +783,6 @@ export class DashboardComponent implements OnInit {
               this.allUsers.splice(removeIndex, 1)
             }
           }
-          // console.log(this.friendRequest)
         }
       }
       else {
@@ -820,7 +799,6 @@ export class DashboardComponent implements OnInit {
   // function to  get new friend 
   public getNewFriend = () => {
     this.getNewFriendSubs = this.todoService.getNewFriend().subscribe((apiResponse) => {
-      // // console.log(apiResponse)
       if (apiResponse.status == 200) {
         if (apiResponse.data.user1Id == this.userId) {
           this.toastrService.success(`You are now friend with ${apiResponse.data.user2Name}`)
@@ -842,8 +820,7 @@ export class DashboardComponent implements OnInit {
             friendId: apiResponse.data.user1Id,
             friendName: apiResponse.data.user1Name,
           }
-          this.friends.push(newFriend)
-          // console.log(this.friendRequest)
+          this.friends.push(newFriend);
         }
       }
       else {
